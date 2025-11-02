@@ -11,11 +11,32 @@ export interface PaperDetails {
   authors: string;
   abstract?: string;
   year?: number;
-  category?: string;
+  category: Array<string>;
+  primary_category: string
 }
 
+
 export interface EmbeddingsData {
-  coordinates: Coordinate[];
-  details: Record<string, PaperDetails>;
-  metadata?: Record<string, any>;
-}
+  coordinates: {
+    id: string;
+    x: number;
+    y: number;
+    z: number;
+  }[];
+  details: Record<
+    string,
+    {
+      title: string;
+      authors: string;
+      year: number;
+      category: Array<string>;
+      primary_category: string;
+      abstract: string;
+    }
+  >;
+  metadata: Record<string, any>;
+  statistics: {
+    top_categories: Record<string, number>;
+    [key: string]: any;
+  };
+};

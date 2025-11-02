@@ -22,7 +22,7 @@ const PointCloud: React.FC<{
       return (
         details?.title?.toLowerCase().includes(query) ||
         details?.authors?.toLowerCase().includes(query) ||
-        details?.category?.toLowerCase().includes(query)
+        details?.primary_category?.toLowerCase().includes(query)
       );
     });
   }, [data, searchQuery]);
@@ -31,7 +31,8 @@ const PointCloud: React.FC<{
     <>
       {filteredPoints.map((coord) => {
         const details = data.details[coord.id];
-        const color = getColorByCategory(details?.category);
+        const color = getColorByCategory(details.primary_category);
+        console.log(details.primary_category)
         
         return (
           <Point

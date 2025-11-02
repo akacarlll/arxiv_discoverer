@@ -1,5 +1,5 @@
 // Info Panel
-import { PaperDetails } from "../../types";
+import { PaperDetails, Coordinate } from "../../types";
 import getColorByCategory from "../../utils/colors";
 import { X } from 'lucide-react';
 
@@ -25,14 +25,14 @@ const InfoPanel: React.FC<{
         <h3>{paper.title}</h3>
         <p className="authors"><strong>Authors:</strong> {paper.authors}</p>
         {paper.year && <p><strong>Year:</strong> {paper.year}</p>}
-        {paper.category && (
+        {paper.primary_category && (
           <p>
             <strong>Category:</strong>{' '}
             <span
               className="category-badge"
-              style={{ backgroundColor: getColorByCategory(paper.category) }}
+              style={{ backgroundColor: getColorByCategory(paper.primary_category) }}
             >
-              {paper.category}
+              {paper.primary_category}
             </span>
           </p>
         )}
