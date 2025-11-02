@@ -11,6 +11,7 @@ import SceneSetup from './components/Scene/SceneSetup.tsx';
 import PointCloud from './components/Scene/PointCloud.tsx';
 import InfoPanel from './components/UI/InfoPanel.tsx';
 import getColorByCategory from './utils/colors.ts';
+import NavigationControls from './components/Scene/NavigationControl.tsx';
 
 // Main App
 const App: React.FC = () => {
@@ -20,6 +21,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const controlsRef = useRef<any>(null);
+  const [controlMode, setControlMode] = useState<'orbit' | 'fly' | 'pointer'>('orbit');
+
 
   useEffect(() => {
     fetch('/data/viz_data.json')
@@ -59,7 +62,6 @@ const App: React.FC = () => {
   if (!data) return <div className="error">No data loaded</div>;
 
   const categories : Array<string> = Object.keys(data.metadata.statistics.top_categories);
-  
   const cameraStartPosition: [number, number, number] = data
     ? [data.metadata.center.x, data.metadata.center.y, data.metadata.center.z]
     : [2,2,2]
@@ -76,9 +78,21 @@ const App: React.FC = () => {
       </div>
 
       <Controls onReset={handleReset} paperCount={data.coordinates.length} />
-
+      
+      <NavigationControls 
+        currentMode={controlMode}
+        onModeChange={setControlMode}
+      />
       <Canvas className="canvas">
-        <SceneSetup controlsRef={controlsRef} cameraPosition={cameraStartPosition} />
+        <SceneSetup
+        controlsRef={controlsRef}
+        cameraPosition={cameraStartPosition}
+        controlMode={controlMode}
+        movementSpeed={0.1}
+        onCameraMove={(pos, target) => {
+          // Optional: Update UI, load nearby papers, etc.
+        }}
+      />
         <Suspense fallback={null}>
           <PointCloud
             data={data}
