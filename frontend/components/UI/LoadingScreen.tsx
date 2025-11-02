@@ -1,11 +1,11 @@
-// Loading Screen
-import React from "react"; 
+import React from "react";
+import styles from "./LoadingScreen.module.css";
 
 const LoadingScreen: React.FC = () => {
   return (
-    <div className="loading-screen">
-      <div className="spinner"></div>
-      <p>Loading embeddings...</p>
+    <div className={styles.container}>
+      <div>Loading Embeddings</div>
+      <div className={styles.spinner}></div>
     </div>
   );
 };
