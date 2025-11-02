@@ -1,0 +1,28 @@
+# Here you can define all your data sets by using simple YAML syntax.
+
+
+categories_list:
+  type: pickle.PickleDataset
+  filepath: data/01_raw/categories_list.pickle
+
+downloaded_papers_df:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/downloaded_papers.csv
+  save_args:
+    index: False
+    encoding: "utf-8"
+    errors: "replace"  # or "ignore"
+  load_args:
+    encoding: "utf-8"
+
+arxiv_embeddings_dict:
+  type: pickle.PickleDataset
+  filepath: data/01_raw/embeddings_dict.pickle
+
+visualization_json:
+  type: kedro_datasets.json.JSONDataset
+  filepath: data/03_primary/viz_data.json
+  save_args:
+    indent: 2
+
+

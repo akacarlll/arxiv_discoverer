@@ -1,0 +1,3 @@
+downloaded_paper_csv_path : data/01_raw/downloaded_papers.csv
+max_results_per_category : 1
+arxiv_articles_download_base_path : data/02_arxiv_articles/
