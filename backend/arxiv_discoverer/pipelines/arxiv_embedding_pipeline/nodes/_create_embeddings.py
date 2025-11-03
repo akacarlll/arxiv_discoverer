@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_embeddings_s3(downloaded_papers_info: dict) -> dict[str, list[float]]:
+def create_embeddings(downloaded_papers_info: dict, num_of_papers_processed : int) -> dict[str, list[float]]:
     """
     Creates embeddings for every text file stored in S3.
 
@@ -25,6 +25,8 @@ def create_embeddings_s3(downloaded_papers_info: dict) -> dict[str, list[float]]
     Returns:
         dict[str, list[float]]: Dictionary mapping S3 key -> embedding vector.
     """
+    logger.info(f"Creating embeddings for {num_of_papers_processed} papers.")
+    
     txt_keys = get_txt_keys_from_s3(downloaded_papers_info["aws_bucket_name"], downloaded_papers_info["df_file_name"])
 
     s3 = boto3.client("s3")
