@@ -8,7 +8,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-def download_papers_by_category(categories: list, downloaded_paper_csv_path : str, bucket_name : str, max_results: int = 100):
+def download_papers_by_category(categories: list, downloaded_papers_info : dict, max_results: int = 100):
     """
     Download N maximum papers from each categories of a list of arxiv publication category.
 
@@ -23,7 +23,7 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
     """
     s3 = boto3.client("s3")
 
-    downloaded_papers_df = get_downloaded_papers_df(downloaded_paper_csv_path)
+    downloaded_papers_df = get_downloaded_papers_df(downloaded_papers_info)
 
     new_entries = []
     papers_ids = get_papers_ids(downloaded_papers_df)
@@ -53,13 +53,13 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
             s3_key = f"articles_files/{category_clean}/{result.get_short_id()}.pdf"
 
             s3.put_object(
-                Bucket=bucket_name,
+                Bucket=downloaded_papers_info["aws_bucket_name"],
                 Key=s3_key,
                 Body=response.content,
                 ContentType="application/pdf"
             )
 
-            logger.info(f"✅ Uploaded {result.get_short_id()}.pdf to s3://{bucket_name}/{s3_key}")
+            logger.info(f"✅ Uploaded {result.get_short_id()}.pdf to s3://{downloaded_papers_info["aws_bucket_name"]}/{s3_key}")
 
             paper_info = {
                 "entry_id": result.entry_id,

@@ -21,8 +21,7 @@ def create_pipeline() -> Pipeline:
                 func=download_papers_by_category,
                 inputs=[
                     "categories_list",
-                    "params:downloaded_paper_csv_path",
-                    "params:aws_bucket_name",
+                    "params:downloaded_papers_info",
                     "params:max_results_per_category",
                 ],
                 outputs=["downloaded_papers_df_local", "downloaded_papers_df_aws_s3"],
@@ -30,14 +29,14 @@ def create_pipeline() -> Pipeline:
             ),
             Node(
                 func=extract_text_from_pdf,
-                inputs=["downloaded_papers_df_local", "params:aws_bucket_name"],
+                inputs=["downloaded_papers_df_local", "params:downloaded_papers_info"],
                 outputs="num_of_papers_processed",
                 name="extract_text_from_pdf_node",
             ),
             Node(
                 func=create_embeddings,
                 inputs=[
-                    "params:arxiv_articles_download_base_path",
+                    "params:downloaded_papers_info",
                     "num_of_papers_processed",
                 ],
                 outputs="arxiv_embeddings_dict",
