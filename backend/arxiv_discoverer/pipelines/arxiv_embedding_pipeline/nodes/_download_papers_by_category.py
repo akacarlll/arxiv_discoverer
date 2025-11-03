@@ -27,7 +27,7 @@ def download_papers_by_category(categories: list, downloaded_papers_info : dict,
 
     new_entries = []
     papers_ids = get_papers_ids(downloaded_papers_df)
-    for i, category in enumerate(categories[:10]):
+    for i, category in enumerate(categories):
         client = arxiv.Client()
 
         search = arxiv.Search(
