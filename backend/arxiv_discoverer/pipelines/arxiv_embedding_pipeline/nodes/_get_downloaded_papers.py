@@ -1,5 +1,8 @@
 import pandas as pd 
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_downloaded_papers_df(downloaded_paper_csv_path : str) -> pd.DataFrame :
     """
@@ -13,6 +16,8 @@ def get_downloaded_papers_df(downloaded_paper_csv_path : str) -> pd.DataFrame :
     """
     if Path(downloaded_paper_csv_path).exists():
         df = pd.read_csv(downloaded_paper_csv_path)
+        logger.info(f"Loaded {len(df)} downloaded papers from {downloaded_paper_csv_path}")
         return df
     else:
+        logger.warning(f"No downloaded papers found at {downloaded_paper_csv_path}")
         return pd.DataFrame([])

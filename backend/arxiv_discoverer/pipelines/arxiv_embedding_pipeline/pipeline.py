@@ -5,7 +5,6 @@ from .nodes import (
     download_papers_by_category,
     extract_text_from_pdf,
     fetch_arxiv_categories,
-    get_downloaded_papers_df,
 )
 
 
@@ -23,15 +22,15 @@ def create_pipeline() -> Pipeline:
                 inputs=[
                     "categories_list",
                     "params:downloaded_paper_csv_path",
-                    "params:arxiv_articles_download_base_path",
+                    "params:bucket_name"
                     "params:max_results_per_category",
                 ],
-                outputs="downloaded_papers_df",
+                outputs=["downloaded_papers_df_local", "downloaded_papers_df_aws_s3"],
                 name="download_papers_by_category_node",
             ),
             Node(
                 func=extract_text_from_pdf,
-                inputs=["params:arxiv_articles_download_base_path", "downloaded_papers_df"],
+                inputs=["downloaded_papers_df", "params:bucket_name"],
                 outputs="num_of_papers_processed",
                 name="extract_text_from_pdf_node",
             ),

@@ -5,15 +5,27 @@ categories_list:
   type: pickle.PickleDataset
   filepath: data/01_raw/categories_list.pickle
 
-downloaded_papers_df:
+downloaded_papers_df_local:
   type: pandas.CSVDataset
   filepath: data/01_raw/downloaded_papers.csv
   save_args:
     index: False
     encoding: "utf-8"
-    errors: "replace"  # or "ignore"
+    errors: "replace"
   load_args:
     encoding: "utf-8"
+
+downloaded_papers_df_aws_s3:
+  type: pandas.CSVDataset
+  filepath: s3://arxiv-file-storage/metadata/downloaded_papers.csv
+  credentials: aws_s3
+  save_args:
+    index: False
+    encoding: "utf-8"
+    errors: "replace"
+  load_args:
+    encoding: "utf-8"
+    sep: ","
 
 arxiv_embeddings_dict:
   type: pickle.PickleDataset

@@ -3,9 +3,12 @@ import pandas as pd
 import arxiv
 import logging
 from ._get_downloaded_papers import get_downloaded_papers_df
+import boto3
+import requests
+
 logger = logging.getLogger(__name__)
 
-def download_papers_by_category(categories: list, downloaded_paper_csv_path : str, arxiv_articles_download_base_path : str, max_results: int = 100):
+def download_papers_by_category(categories: list, downloaded_paper_csv_path : str, bucket_name : str, max_results: int = 100):
     """
     Download N maximum papers from each categories of a list of arxiv publication category.
 
@@ -18,6 +21,7 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
     Returns:
         pd.DataFrame: DataFrame containing information about all downloaded papers.
     """
+    s3 = boto3.client("s3")
 
     downloaded_papers_df = get_downloaded_papers_df(downloaded_paper_csv_path)
 
@@ -33,14 +37,29 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
             )
 
 
-        category_path = Path(arxiv_articles_download_base_path) / category.replace(" ", "_")
-        category_path.mkdir(parents=True, exist_ok=True)
+        category_clean = category.replace(" ", "_")
 
         for result in client.results(search):
             if result.entry_id in papers_ids:
                 logger.info(f"Paper {result.entry_id} already downloaded. Skipping.")
                 continue
-            result.download_pdf(dirpath=category_path, filename=f"{result.get_short_id()}.pdf")
+            
+            pdf_url = result.pdf_url
+            response = requests.get(pdf_url) # type: ignore
+            if response.status_code != 200:
+                logger.warning(f"Failed to download {pdf_url}")
+                continue
+
+            s3_key = f"articles_files/{category_clean}/{result.get_short_id()}.pdf"
+
+            s3.put_object(
+                Bucket=bucket_name,
+                Key=s3_key,
+                Body=response.content,
+                ContentType="application/pdf"
+            )
+
+            logger.info(f"✅ Uploaded {result.get_short_id()}.pdf to s3://{bucket_name}/{s3_key}")
 
             paper_info = {
                 "entry_id": result.entry_id,
@@ -55,15 +74,15 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
                 "categories": result.categories,
                 "links": [link.href for link in result.links],
                 "pdf_url": result.pdf_url,
-                "pdf_path": str(category_path / f"{result.get_short_id()}.pdf"),
-                "txt_path": str(category_path / f"{result.get_short_id()}.txt"),
+                "pdf_path": f"articles_files/{category_clean}/{result.get_short_id()}.pdf",
+                "txt_path": f"articles_files/{category_clean}/{result.get_short_id()}.txt",
                 "summary" : result.summary
             }
 
             new_entries.append(paper_info)
             logger.info(f"Downloaded and added paper: {result.title}")
 
-    logger.info(f"Downloaded {max_results} papers for category {i+1}/{len(categories)}: {category}")
+        logger.info(f"Downloaded {max_results} papers for category {i+1}/{len(categories)}: {category}")
 
     new_df = pd.DataFrame(new_entries)
     if downloaded_papers_df is None or downloaded_papers_df.empty:
@@ -73,7 +92,7 @@ def download_papers_by_category(categories: list, downloaded_paper_csv_path : st
 
     downloaded_papers_df["year_published"] = pd.to_datetime(downloaded_papers_df["published"]).dt.year
     
-    return downloaded_papers_df
+    return downloaded_papers_df, downloaded_papers_df
 
 def get_papers_ids(df: pd.DataFrame) -> set:
     if df.empty:
