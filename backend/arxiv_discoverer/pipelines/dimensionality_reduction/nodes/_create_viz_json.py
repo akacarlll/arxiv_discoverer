@@ -12,7 +12,7 @@ def create_visualization_json(
     summary_max_length: int = 200,
     calculate_bounds: bool = True,
     add_statistics: bool = True
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """
     Create separated JSON structure for visualization
     
@@ -104,7 +104,7 @@ def create_visualization_json(
         'metadata': metadata
     }
     
-    return result
+    return result, result
 
 def generate_paper_id(row: pd.Series) -> str:
     """

@@ -29,7 +29,7 @@ def create_pipeline() -> Pipeline:
         node(
             func=create_visualization_json,
             inputs=["merged_embeddings_metadata_dict", "params:detail_fields"],
-            outputs="visualization_json",
+            outputs=["visualization_json_local","visualization_json_aws_s3"],
             name="create_visualization_json_node"
         )
     ])
