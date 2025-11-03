@@ -10,17 +10,17 @@ dimensionality_reduction_params_umap:
     metric: "euclidean"
 
 detail_fields:
-  - 'entry_id'
-  - 'updated'
-  - 'published'
-  - 'title'
-  - 'authors'
-  - 'comment'
-  - 'journal_ref' 
-  - 'doi'
-  - 'primary_category'
-  - 'categories'
-  - 'links'
-  - 'pdf_url'
-  - 'summary'
-  - year_published
+  - "entry_id"
+  - "updated"
+  - "published"
+  - "title"
+  - "authors"
+  - "comment"
+  - "journal_ref" 
+  - "doi"
+  - "primary_category"
+  - "categories"
+  - "links"
+  - "pdf_url"
+  - "summary"
+  - "year_published"
