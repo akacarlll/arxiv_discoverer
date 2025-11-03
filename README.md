@@ -46,7 +46,7 @@ Key Requirement: The application must load this JSON file at startup, create a 3
 
 ###### Frontend :  
 
-- ramework: React
+- Framework: React
 - 3D Rendering: Three.js / @react-three/fiber (R3F)
 - Build Tool/Bundling: Vite
 - Language: TypeScript
