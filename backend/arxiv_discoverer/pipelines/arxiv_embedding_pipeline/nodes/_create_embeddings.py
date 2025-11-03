@@ -3,7 +3,6 @@ from sentence_transformers import SentenceTransformer
 import pickle
 import pandas as pd
 import logging 
-from .get_file_paths import get_file_paths
 
 logger = logging.getLogger(__name__)
 
