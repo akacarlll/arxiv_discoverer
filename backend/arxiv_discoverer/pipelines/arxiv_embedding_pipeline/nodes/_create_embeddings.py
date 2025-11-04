@@ -1,13 +1,15 @@
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 import pandas as pd
-import logging 
-import boto3
+import logging
 
 
 logger = logging.getLogger(__name__)
 
-def create_embeddings(downloaded_papers_df : pd.DataFrame, model_path : str) -> dict[str, list[float]]:
+
+def create_embeddings(
+    downloaded_papers_df: pd.DataFrame, model_path: str
+) -> dict[str, list[float]]:
     """
     Creates embeddings for every text file stored in S3.
 
@@ -22,13 +24,14 @@ def create_embeddings(downloaded_papers_df : pd.DataFrame, model_path : str) -> 
     model = SentenceTransformer(model_path)
     embeddings = {}
 
-    for i, row in tqdm(downloaded_papers_df.iterrows(), total=len(downloaded_papers_df)):
+    for _, row in tqdm(
+        downloaded_papers_df.iterrows(), total=len(downloaded_papers_df)
+    ):
         key = row["paper_id"]
-        text = row["summary"]
-        emb = model.encode(text, normalize_embeddings=True)
+        text_to_encode = f"Title : {row["title"]}\n Abstract : {row["summary"]}"
+        emb = model.encode(text_to_encode, normalize_embeddings=True)
         embeddings[key] = emb
 
     logger.info(f"Created embeddings for {len(embeddings)} papers.")
 
     return embeddings
-

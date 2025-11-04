@@ -1,13 +1,15 @@
 import logging
-
 import arxiv
+from arxiv import Client, Search
 import pandas as pd
 import numpy as np
+from unidecode import unidecode
+
 logger = logging.getLogger(__name__)
 
 
 def download_papers_by_category(
-    downloaded_papers_df : pd.DataFrame, categories: list, max_results: int = 100
+    downloaded_papers_df: pd.DataFrame, categories: list, max_results: int = 100
 ):
     """
     Download papers from specified arXiv categories and upload them to S3.
@@ -22,7 +24,7 @@ def download_papers_by_category(
 
     new_entries = []
     papers_ids = get_papers_ids(downloaded_papers_df)
-    for i, category in enumerate(categories[:30]):
+    for i, category in enumerate(categories):
 
         for result in arxiv_search_query(category, max_results):
             if result.entry_id in papers_ids:
@@ -41,7 +43,9 @@ def download_papers_by_category(
     return update_downloaded_papers_df(downloaded_papers_df, new_entries)
 
 
-def update_downloaded_papers_df(downloaded_papers_df: pd.DataFrame, new_entries: list) -> tuple[pd.DataFrame, pd.DataFrame]:
+def update_downloaded_papers_df(
+    downloaded_papers_df: pd.DataFrame, new_entries: list
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Update the DataFrame of downloaded papers with new entries.
 
@@ -64,9 +68,20 @@ def update_downloaded_papers_df(downloaded_papers_df: pd.DataFrame, new_entries:
         downloaded_papers_df["published"]
     ).dt.year
 
-    return ensure_utf_8_compatibility(downloaded_papers_df), ensure_utf_8_compatibility(downloaded_papers_df)
+    length_before_drop_duplicate = len(downloaded_papers_df)
+    downloaded_papers_df = downloaded_papers_df.drop_duplicates(subset="paper_id")
+    length_after_drop_duplicate = len(downloaded_papers_df)
 
-def encode_to_utf_8(element):
+    logger.info(
+        f"{length_before_drop_duplicate - length_after_drop_duplicate} lines dropped after removing duplicates."
+    )
+
+    return ensure_utf_8_compatibility(downloaded_papers_df), ensure_utf_8_compatibility(
+        downloaded_papers_df
+    )
+
+
+def encode_to_utf_8(element: list | str):
     """
     Ensure the text is UTF-8 compatible.
     Replace or remove problematic characters.
@@ -74,10 +89,8 @@ def encode_to_utf_8(element):
     if not element:
         return element
     elif isinstance(element, str):
-        # Encode/decode safely to UTF-8
-        return element.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
+        return unidecode(element)
     elif isinstance(element, (list, np.ndarray)):
-        # Recursively sanitize each element
         return [encode_to_utf_8(subelement) for subelement in element]
 
 
@@ -96,30 +109,30 @@ def extract_paper_info(result) -> dict:
 
     Args:
         result: arXiv paper result object.
-        category_clean (str): Cleaned category name.
 
     Returns:
         dict: Dictionary containing extracted paper information.
     """
-    if not result.summary :
+    if not result.summary:
         logger.info(f"Paper {result.entry_id} has no abstract.")
 
     return {
-                "entry_id": result.entry_id,
-                "updated": result.updated,
-                "published": result.published,
-                "title": result.title,
-                "authors": [author.name for author in result.authors],
-                "comment": result.comment,
-                "journal_ref": result.journal_ref,
-                "doi": result.doi,
-                "primary_category": result.primary_category,
-                "categories": result.categories,
-                "links": [link.href for link in result.links],
-                "pdf_url": result.pdf_url,
-                "summary": result.summary,
-                "paper_id": result.get_short_id(),
-            }
+        "entry_id": result.entry_id,
+        "updated": result.updated,
+        "published": result.published,
+        "title": result.title,
+        "authors": [author.name for author in result.authors],
+        "comment": result.comment,
+        "journal_ref": result.journal_ref,
+        "doi": result.doi,
+        "primary_category": result.primary_category,
+        "categories": result.categories,
+        "links": [link.href for link in result.links],
+        "pdf_url": result.pdf_url,
+        "summary": result.summary,
+        "paper_id": result.get_short_id(),
+    }
+
 
 def arxiv_search_query(category: str, max_results: int):
     """
@@ -141,12 +154,14 @@ def arxiv_search_query(category: str, max_results: int):
     )
     return safe_results(client, search)
 
-def safe_results(client, search):
+
+def safe_results(client: Client, search: Search):
     try:
         for r in client.results(search):
             yield r
     except Exception as e:
         print("Error while fetching results:", e)
+
 
 def get_papers_ids(df: pd.DataFrame) -> set:
     """
