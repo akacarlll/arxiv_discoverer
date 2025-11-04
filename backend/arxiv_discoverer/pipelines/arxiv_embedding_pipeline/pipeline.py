@@ -5,6 +5,7 @@ from .nodes import (
     download_papers_by_category,
     extract_text_from_pdf,
     fetch_arxiv_categories,
+    get_downloaded_papers_df,
 )
 
 
@@ -18,8 +19,15 @@ def create_pipeline() -> Pipeline:
                 name="fetch_arxiv_categories_node",
             ),
             Node(
+                func=get_downloaded_papers_df,
+                inputs="params:downloaded_papers_info",
+                outputs="downloaded_papers_df_previous_iteration",
+                name="get_downloaded_papers_df_node",
+            ),
+            Node(
                 func=download_papers_by_category,
                 inputs=[
+                    "downloaded_papers_df_previous_iteration",
                     "categories_list",
                     "params:downloaded_papers_info",
                     "params:max_results_per_category",
