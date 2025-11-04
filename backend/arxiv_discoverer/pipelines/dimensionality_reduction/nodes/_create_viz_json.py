@@ -1,9 +1,6 @@
 import pandas as pd
-import numpy as np
-import json
 import hashlib
 from typing import Any
-from pathlib import Path
 
 
 def create_visualization_json(
@@ -117,7 +114,7 @@ def generate_paper_id(row: pd.Series) -> str:
     Returns:
         Unique ID string
     """
-    return hashlib.md5(str(row['txt_path']).encode()).hexdigest()
+    return hashlib.md5(str(row['paper_id']).encode()).hexdigest()
     
 
 def truncate_text(text: str, max_length: int = 200) -> str:
