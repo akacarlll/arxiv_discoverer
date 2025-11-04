@@ -2,39 +2,24 @@
 
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 import LoadingScreen from "./components/UI/LoadingScreen.tsx";
-import { EmbeddingsData, PaperDetails, Coordinate} from "./types/index.ts"
 import SearchBar from './components/UI/SearchBar.tsx';
 import Controls from './components/UI/Control.tsx';
-import SceneSetup from './components/Scene/SceneSetup.tsx';
-import PointCloud from './components/Scene/PointCloud.tsx';
 import InfoPanel from './components/UI/InfoPanel.tsx';
 import getColorByCategory from './utils/colors.ts';
 import NavigationControls from './components/Scene/NavigationControl.tsx';
+import { useEmbeddingsData } from './hooks/useEmbeddingsData.ts';
+import SceneContainer from './components/Scene/SceneContainer.tsx';
 
 // Main App
 const App: React.FC = () => {
-  const [data, setData] = useState<EmbeddingsData | null>(null);
+  const { data, loading, error } = useEmbeddingsData();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const controlsRef = useRef<any>(null);
   const [controlMode, setControlMode] = useState<'orbit' | 'fly' | 'pointer'>('orbit');
-
-
-  useEffect(() => {
-    fetch('/data/viz_data.json')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch data');
-        return res.json();
-      })
-      .then((json) => setData(json))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
 
   const handleReset = () => {
     if (controlsRef.current) {
@@ -63,10 +48,6 @@ const App: React.FC = () => {
 
   const categories : Array<string> = Object.keys(data.metadata.statistics.ordered_top_ten_categories);
 
-  const cameraStartPosition: [number, number, number] = data
-    ? [data.metadata.center.x, data.metadata.center.y, data.metadata.center.z]
-    : [2,2,2]
-
   return (
     <div className="app">
       <div className="header">
@@ -84,25 +65,12 @@ const App: React.FC = () => {
         currentMode={controlMode}
         onModeChange={setControlMode}
       />
-      <Canvas className="canvas">
-        <SceneSetup
-        controlsRef={controlsRef}
-        cameraPosition={cameraStartPosition}
+      <SceneContainer
+        data={data}
+        selectedId={selectedId}
+        onSelectPoint={setSelectedId}
         controlMode={controlMode}
-        movementSpeed={0.1}
-        onCameraMove={(pos, target) => {
-          // Optional: Update UI, load nearby papers, etc.
-        }}
       />
-        <Suspense fallback={null}>
-          <PointCloud
-            data={data}
-            selectedId={selectedId}
-            onSelectPoint={setSelectedId}
-            searchQuery={searchQuery}
-          />
-        </Suspense>
-      </Canvas>
 
       <InfoPanel
         paperId={selectedId}

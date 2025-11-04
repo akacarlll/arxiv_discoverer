@@ -28,7 +28,7 @@ const Point: React.FC<{
       <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={isSelected ? 0.8 : isHovered ? 0.4 : 0.2}
+        emissiveIntensity={isSelected ? 10: isHovered ? 5 : 2.5}
         transparent
         opacity={isSelected ? 1 : 0.85}
       />
@@ -36,4 +36,6 @@ const Point: React.FC<{
   );
 };
 
-export default Point
+
+
+export default Point;
