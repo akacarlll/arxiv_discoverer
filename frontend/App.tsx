@@ -61,7 +61,8 @@ const App: React.FC = () => {
   if (error) return <div className="error">Error: {error}</div>;
   if (!data) return <div className="error">No data loaded</div>;
 
-  const categories : Array<string> = Object.keys(data.metadata.statistics.top_categories);
+  const categories : Array<string> = Object.keys(data.metadata.statistics.ordered_top_ten_categories);
+
   const cameraStartPosition: [number, number, number] = data
     ? [data.metadata.center.x, data.metadata.center.y, data.metadata.center.z]
     : [2,2,2]

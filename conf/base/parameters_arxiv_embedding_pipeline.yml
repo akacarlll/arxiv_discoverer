@@ -1,7 +1,9 @@
-max_results_per_category : 1
+max_results_per_category : 50
 arxiv_articles_download_base_path : data/02_arxiv_articles/
 
 downloaded_papers_info:
   downloaded_paper_csv_path : data/01_raw/downloaded_papers.csv
   aws_bucket_name : arxiv-file-storage
   df_file_name : metadata/downloaded_papers.csv
+
+model_path : all-MiniLM-L6-v2

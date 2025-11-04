@@ -33,7 +33,7 @@ arxiv_embeddings_dict:
 
 visualization_json_local:
   type: kedro_datasets.json.JSONDataset
-  filepath: data/03_primary/viz_data.json
+  filepath: frontend/public/data/viz_data.json
   save_args:
     indent: 2
 
@@ -41,5 +41,11 @@ visualization_json_aws_s3:
   type: kedro_datasets.json.JSONDataset
   filepath: data/03_primary/viz_data.json
   credentials: aws_s3
+  save_args:
+    indent: 2
+
+category_colors_map:
+  type: kedro_datasets.json.JSONDataset
+  filepath: frontend/public/data/colors_mapping.json
   save_args:
     indent: 2

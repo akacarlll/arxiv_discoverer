@@ -88,8 +88,12 @@ def create_visualization_json(
                 stats['year_range'] = [int(year_valid.min()), int(year_valid.max())]
         
 
+        category_counts = df['primary_category'].value_counts().to_dict()
+        stats['ordered_top_categories'] = {str(k): int(v) for k, v in category_counts.items()}
+
         category_counts = df['primary_category'].value_counts().head(10).to_dict()
-        stats['top_categories'] = {str(k): int(v) for k, v in category_counts.items()}
+        stats['ordered_top_ten_categories'] = {str(k): int(v) for k, v in category_counts.items()}
+
         
         stats['available_fields'] = detail_fields
         

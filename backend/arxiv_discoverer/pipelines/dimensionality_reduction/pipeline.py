@@ -2,7 +2,8 @@ from kedro.pipeline import Node, Pipeline, node, pipeline  # noqa
 from .nodes import (
     reduce_vectors_dimensionality,
     merge_embeddings_metadata,
-    create_visualization_json
+    create_visualization_json,
+    generate_category_colors
 )
 
 def create_pipeline() -> Pipeline:
@@ -24,5 +25,11 @@ def create_pipeline() -> Pipeline:
             inputs=["merged_embeddings_metadata_dict", "params:detail_fields"],
             outputs=["visualization_json_local","visualization_json_aws_s3"],
             name="create_visualization_json_node"
+        ),
+        node(
+            func=generate_category_colors,
+            inputs="visualization_json_local",
+            outputs="category_colors_map",
+            name="generate_category_colors_node"
         )
     ])

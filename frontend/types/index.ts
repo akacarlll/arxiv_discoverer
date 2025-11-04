@@ -36,7 +36,7 @@ export interface EmbeddingsData {
   >;
   metadata: Record<string, any>;
   statistics: {
-    top_categories: Record<string, number>;
+    ordered_top_categories: Record<string, number>;
     [key: string]: any;
   };
 };
