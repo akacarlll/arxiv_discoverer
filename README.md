@@ -12,8 +12,7 @@ The project is divided into two distinct components: the backend data pipeline a
 
 | *Component*    | *Technology* | *Role* |
 | -------------- | ------------ | ------ |
-| Backend (Data Pipelines)  | Kedro, Python, Arxiv, Numpy, Umap, SciKit-Learn, HuggingFace   | Downloads papers, generates paper embeddings, creates rich metadata dataframes, and processes the final visualization-ready JSON file.
-| 
+| Backend (Data Pipelines)  | Kedro, Python, Arxiv, Numpy, Umap, SciKit-Learn, HuggingFace   | Downloads papers, generates paper embeddings, creates rich metadata dataframes, and processes the final visualization-ready JSON file.| 
 Frontend (Visualization App) | React, TypeScript, Three.js/R3F | Loads the generated JSON data, renders the interactive 3D space, and handles user interactions (navigation, hover, click). |
 
   
