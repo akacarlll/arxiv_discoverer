@@ -1,65 +1,41 @@
 import logging
 
 import arxiv
-import boto3
 import pandas as pd
-import requests
-
-from ._get_downloaded_papers import get_downloaded_papers_df
-
+import numpy as np
 logger = logging.getLogger(__name__)
 
 
 def download_papers_by_category(
-    downloaded_papers_df : pd.DataFrame, categories: list, downloaded_papers_info: dict, max_results: int = 100
+    downloaded_papers_df : pd.DataFrame, categories: list, max_results: int = 100
 ):
     """
     Download papers from specified arXiv categories and upload them to S3.
 
     Args:
         categories (list): List of arXiv publication categories.
-        downloaded_papers_info (dict): Information about the S3 bucket and file paths.
         max_results (int): Maximum number of papers to download per category.
 
     Returns:
         pd.DataFrame: Updated DataFrame containing information about all downloaded papers.
     """
-    s3_instance = boto3.client("s3")
 
     new_entries = []
     papers_ids = get_papers_ids(downloaded_papers_df)
-    for i, category in enumerate(categories):
-
-        category_clean = category.replace(" ", "_")
+    for i, category in enumerate(categories[:30]):
 
         for result in arxiv_search_query(category, max_results):
             if result.entry_id in papers_ids:
                 logger.info(f"Paper {result.entry_id} already downloaded. Skipping.")
                 continue
 
-            pdf_url = result.pdf_url
-            response = requests.get(pdf_url)  # type: ignore
-            if response.status_code != 200:
-                logger.warning(f"Failed to download {pdf_url}")
-                continue
-
-            s3_key = f"articles_files/{category_clean}/{result.get_short_id()}.pdf"
-
-            upload_to_s3_bucket(
-                s3_instance, response.content, downloaded_papers_info, s3_key
-            )
-
-            logger.info(
-                f"✅ Uploaded {result.get_short_id()}.pdf to s3://{downloaded_papers_info["aws_bucket_name"]}/{s3_key}"
-            )
-
-            paper_info = extract_paper_info(result, category_clean)
+            paper_info = extract_paper_info(result)
 
             new_entries.append(paper_info)
-            logger.info(f"Downloaded and added paper: {result.title}")
+            logger.info(f"Added : {result.title}")
 
         logger.info(
-            f"Downloaded {max_results} papers for category {i+1}/{len(categories)}: {category}"
+            f"Downloaded papers for category {i+1}/{len(categories)}: {category}"
         )
 
     return update_downloaded_papers_df(downloaded_papers_df, new_entries)
@@ -88,9 +64,33 @@ def update_downloaded_papers_df(downloaded_papers_df: pd.DataFrame, new_entries:
         downloaded_papers_df["published"]
     ).dt.year
 
-    return downloaded_papers_df, downloaded_papers_df
+    return ensure_utf_8_compatibility(downloaded_papers_df), ensure_utf_8_compatibility(downloaded_papers_df)
 
-def extract_paper_info(result, category_clean: str) -> dict:
+def encode_to_utf_8(element):
+    """
+    Ensure the text is UTF-8 compatible.
+    Replace or remove problematic characters.
+    """
+    if not element:
+        return element
+    elif isinstance(element, str):
+        # Encode/decode safely to UTF-8
+        return element.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore')
+    elif isinstance(element, (list, np.ndarray)):
+        # Recursively sanitize each element
+        return [encode_to_utf_8(subelement) for subelement in element]
+
+
+def ensure_utf_8_compatibility(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sanitize all string columns in a DataFrame to be UTF-8 compatible.
+    """
+    for col in df.columns:
+        df[col] = df[col].apply(encode_to_utf_8)
+    return df
+
+
+def extract_paper_info(result) -> dict:
     """
     Extract relevant information from an arXiv paper result.
 
@@ -101,6 +101,9 @@ def extract_paper_info(result, category_clean: str) -> dict:
     Returns:
         dict: Dictionary containing extracted paper information.
     """
+    if not result.summary :
+        logger.info(f"Paper {result.entry_id} has no abstract.")
+
     return {
                 "entry_id": result.entry_id,
                 "updated": result.updated,
@@ -114,33 +117,9 @@ def extract_paper_info(result, category_clean: str) -> dict:
                 "categories": result.categories,
                 "links": [link.href for link in result.links],
                 "pdf_url": result.pdf_url,
-                "pdf_path": f"articles_files/{category_clean}/{result.get_short_id()}.pdf",
-                "txt_path": f"articles_files/{category_clean}/{result.get_short_id()}.txt",
                 "summary": result.summary,
+                "paper_id": result.get_short_id(),
             }
-
-def upload_to_s3_bucket(
-    s3_instance, file_content: bytes, downloaded_papers_info: dict, s3_key: str
-) -> None:
-    """
-    Upload a file to an S3 bucket.
-
-    Args:
-        s3_instance: Boto3 S3 client instance.
-        file_content (bytes): Content of the file to upload.
-        downloaded_papers_info (dict): Information about the S3 bucket.
-        s3_key (str): S3 key for the uploaded file.
-
-    Returns:
-        None
-    """
-    s3_instance.put_object(
-        Bucket=downloaded_papers_info["aws_bucket_name"],
-        Key=s3_key,
-        Body=file_content,
-        ContentType="application/pdf",
-    )
-
 
 def arxiv_search_query(category: str, max_results: int):
     """
@@ -160,8 +139,14 @@ def arxiv_search_query(category: str, max_results: int):
         max_results=max_results,
         sort_by=arxiv.SortCriterion.SubmittedDate,
     )
-    return client.results(search)
+    return safe_results(client, search)
 
+def safe_results(client, search):
+    try:
+        for r in client.results(search):
+            yield r
+    except Exception as e:
+        print("Error while fetching results:", e)
 
 def get_papers_ids(df: pd.DataFrame) -> set:
     """

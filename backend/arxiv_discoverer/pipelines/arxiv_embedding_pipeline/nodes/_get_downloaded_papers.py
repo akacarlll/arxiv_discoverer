@@ -7,7 +7,7 @@ import io
 
 logger = logging.getLogger(__name__)
 
-def get_downloaded_papers_df(downloaded_paper_info : dict, loading_type: Literal["local", "aws"] = "aws") -> pd.DataFrame :
+def get_downloaded_papers_df(downloaded_paper_info : dict, loading_type: Literal["local", "aws"] = "local") -> pd.DataFrame :
     """
     Get a DataFrame of downloaded papers.
 
