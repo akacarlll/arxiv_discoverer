@@ -42,8 +42,10 @@ const PointCloud: React.FC<{
             color={color}
             isSelected={selectedId === coord.id}
             isHovered={hoveredId === coord.id}
-            onClick={() => onSelectPoint(coord.id)}
-            onHover={(hovering) => setHoveredId(hovering ? coord.id : null)}
+            onHover={(hovering) => {
+              setHoveredId(hovering ? coord.id : null);
+              onSelectPoint(hovering ? coord.id : null); // <-- open/close panel on hover
+            }}
           />
         );
       })}

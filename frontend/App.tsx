@@ -1,15 +1,12 @@
 
 
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 import LoadingScreen from "./components/UI/LoadingScreen.tsx";
 import SearchBar from './components/UI/SearchBar.tsx';
 import Controls from './components/UI/Control.tsx';
 import InfoPanel from './components/UI/InfoPanel.tsx';
 import getColorByCategory from './utils/colors.ts';
-import NavigationControls from './components/Scene/NavigationControl.tsx';
 import { useEmbeddingsData } from './hooks/useEmbeddingsData.ts';
 import SceneContainer from './components/Scene/SceneContainer.tsx';
 import IntroModal from './components/UI/IntroModal.tsx';
@@ -92,10 +89,6 @@ const App: React.FC = () => {
 
       <Controls onReset={handleReset} paperCount={data.coordinates.length} />
       
-      <NavigationControls 
-        currentMode={controlMode}
-        onModeChange={setControlMode}
-      />
       <SceneContainer
         data={data}
         selectedId={selectedId}

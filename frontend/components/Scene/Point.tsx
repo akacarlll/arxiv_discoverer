@@ -9,9 +9,8 @@ const Point: React.FC<{
   color: string;
   isSelected: boolean;
   isHovered: boolean;
-  onClick: () => void;
   onHover: (hovering: boolean) => void;
-}> = ({ position, id, color, isSelected, isHovered, onClick, onHover }) => {
+}> = ({ position, id, color, isSelected, isHovered,  onHover }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const scale = isSelected ? 2.5 : isHovered ? 1.8 : 1;
 
@@ -19,7 +18,6 @@ const Point: React.FC<{
     <mesh
       ref={meshRef}
       position={position}
-      onClick={onClick}
       onPointerOver={() => onHover(true)}
       onPointerOut={() => onHover(false)}
       scale={scale}
