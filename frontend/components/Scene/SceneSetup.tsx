@@ -16,7 +16,7 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
   controlsRef, 
   cameraPosition,
   controlMode = 'orbit',
-  movementSpeed = 0.05,
+  movementSpeed = 0.00001,
   onCameraMove
 }) => {
   const { camera } = useThree();
