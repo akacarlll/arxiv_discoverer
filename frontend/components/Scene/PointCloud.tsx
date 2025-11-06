@@ -9,7 +9,7 @@ const PointCloud: React.FC<{
   data: EmbeddingsData;
   selectedId: string | null;
   onSelectPoint: (id: string | null) => void;
-  searchQuery: string;
+  searchQuery?: string;
 }> = ({ data, selectedId, onSelectPoint, searchQuery }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 

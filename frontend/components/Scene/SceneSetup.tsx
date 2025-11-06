@@ -20,7 +20,6 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
   onCameraMove
 }) => {
   const { camera } = useThree();
-  const keysPressed = useRef<Set<string>>(new Set());
   const moveState = useRef({
     forward: 0,
     backward: 0,
@@ -29,35 +28,33 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     up: 0,
     down: 0
   });
+  const isShiftPressed = useRef(false);
 
-  // Fly controls implementation
+  // 🔹 Keyboard movement logic
   useEffect(() => {
     if (controlMode !== 'fly') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      keysPressed.current.add(e.key.toLowerCase());
-      
-      switch(e.key.toLowerCase()) {
+      switch (e.key.toLowerCase()) {
         case 'z': moveState.current.forward = 1; break;
         case 's': moveState.current.backward = 1; break;
         case 'q': moveState.current.left = 1; break;
         case 'd': moveState.current.right = 1; break;
-        case 'w': moveState.current.down = 1; break;
-        case 'e': moveState.current.up = 1; break;
-        case 'shift': movementSpeed *= 2; break;
+        case 'e': moveState.current.down = 1; break;
+        case 'a': moveState.current.up = 1; break;
+        case 'shift': isShiftPressed.current = true; break;
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      keysPressed.current.delete(e.key.toLowerCase());
-      
-      switch(e.key.toLowerCase()) {
-        case 'w': moveState.current.forward = 0; break;
+      switch (e.key.toLowerCase()) {
+        case 'z': moveState.current.forward = 0; break;
         case 's': moveState.current.backward = 0; break;
-        case 'a': moveState.current.left = 0; break;
+        case 'q': moveState.current.left = 0; break;
         case 'd': moveState.current.right = 0; break;
-        case 'q': moveState.current.down = 0; break;
-        case 'e': moveState.current.up = 0; break;
+        case 'e': moveState.current.down = 0; break;
+        case 'a': moveState.current.up = 0; break;
+        case 'shift': isShiftPressed.current = false; break;
       }
     };
 
@@ -68,48 +65,50 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [controlMode, movementSpeed]);
+  }, [controlMode]);
 
-  // Animation loop for fly controls
+  // 🔹 Animation loop for Fly movement
   useEffect(() => {
     if (controlMode !== 'fly') return;
 
     let animationId: number;
+    let prevTime = performance.now();
+
     const animate = () => {
+      const now = performance.now();
+      const delta = (now - prevTime) / 1000; // seconds
+      prevTime = now;
+
       const direction = new THREE.Vector3();
       const right = new THREE.Vector3();
       const up = new THREE.Vector3(0, 1, 0);
 
-      // Get camera's forward and right directions
       camera.getWorldDirection(direction);
       right.crossVectors(direction, up).normalize();
 
-      // Calculate movement
-      const movement = new THREE.Vector3();
-      
+      const moveVec = new THREE.Vector3();
+
+      // Adjust speed dynamically
+      const speed = (isShiftPressed.current ? movementSpeed * 2 : movementSpeed) * delta * 60;
+
       // Forward/Backward
-      movement.add(
-        direction.multiplyScalar(
-          (moveState.current.forward - moveState.current.backward) * movementSpeed
-        )
-      );
-      
-      // Left/Right (strafe)
-      movement.add(
-        right.multiplyScalar(
-          (moveState.current.right - moveState.current.left) * movementSpeed
-        )
-      );
-      
+      moveVec.add(direction.clone().multiplyScalar(
+        (moveState.current.forward - moveState.current.backward) * speed
+      ));
+
+      // Left/Right
+      moveVec.add(right.clone().multiplyScalar(
+        (moveState.current.right - moveState.current.left) * speed
+      ));
+
       // Up/Down
-      movement.y += (moveState.current.up - moveState.current.down) * movementSpeed;
+      moveVec.y += (moveState.current.up - moveState.current.down) * speed;
 
       // Apply movement
-      if (movement.length() > 0) {
-        camera.position.add(movement);
-        
+      if (moveVec.lengthSq() > 0) {
+        camera.position.add(moveVec);
         if (onCameraMove && controlsRef.current) {
-          onCameraMove(camera.position, controlsRef.current.target);
+          onCameraMove(camera.position, controlsRef.current.target ?? new THREE.Vector3());
         }
       }
 
@@ -117,16 +116,15 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     };
 
     animate();
-
-    return () => {
-      if (animationId) cancelAnimationFrame(animationId);
-    };
+    return () => cancelAnimationFrame(animationId);
   }, [camera, controlMode, movementSpeed, onCameraMove, controlsRef]);
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={cameraPosition} fov={60} />
-      
+      {/* Main camera */}
+      <PerspectiveCamera makeDefault position={cameraPosition} fov={90} />
+
+      {/* Orbit mode */}
       {controlMode === 'orbit' && (
         <OrbitControls
           ref={controlsRef}
@@ -141,25 +139,13 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
           }}
         />
       )}
-      
+
+      {/* True Fly mode with mouse look */}
       {controlMode === 'fly' && (
-        <OrbitControls
-          ref={controlsRef}
-          enablePan={false}
-          enableZoom={false}
-          enableDamping
-          dampingFactor={0.1}
-          rotateSpeed={0.5}
-        />
-      )}
-      
-      {controlMode === 'pointer' && (
-        <PointerLockControls
-          ref={controlsRef}
-          selector="#canvas-container"
-        />
+        <PointerLockControls ref={controlsRef} />
       )}
 
+      {/* Basic lighting */}
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={0.8} />
       <pointLight position={[-10, -10, -10]} intensity={0.3} />
@@ -168,4 +154,3 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
 };
 
 export default SceneSetup;
-
