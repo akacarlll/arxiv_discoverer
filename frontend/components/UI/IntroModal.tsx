@@ -8,7 +8,7 @@ interface IntroModalProps {
   show: boolean;
 }
 
-const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "orbit", onStart, show }) => {
+const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, show }) => {
   const [selectedMode, setSelectedMode] = useState<ControlMode>(defaultMode);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
@@ -33,7 +33,19 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "orbit", onStart,
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <h4 style={{ marginBottom: 8 }}>Choisir le mode de navigation</h4>
+          <h4 style={{ marginBottom: 8 }}>Choose the navigation mode</h4>
+
+          
+          <label style={radioLabelStyle}>
+            <input
+              type="radio"
+              name="navmode"
+              value="fly"
+              checked={selectedMode === "fly"}
+              onChange={() => setSelectedMode("fly")}
+            />
+            <span style={{ marginLeft: 8 }}>✈️ Fly — Fly Freely in Space (Recommended).</span>
+          </label>
 
           <label style={radioLabelStyle}>
             <input
@@ -43,18 +55,7 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "orbit", onStart,
               checked={selectedMode === "orbit"}
               onChange={() => setSelectedMode("orbit")}
             />
-            <span style={{ marginLeft: 8 }}>🌀 Orbit — Faire tourner la caméra autour d'un point</span>
-          </label>
-
-          <label style={radioLabelStyle}>
-            <input
-              type="radio"
-              name="navmode"
-              value="fly"
-              checked={selectedMode === "fly"}
-              onChange={() => setSelectedMode("fly")}
-            />
-            <span style={{ marginLeft: 8 }}>✈️ Fly — Voler librement dans l'espace</span>
+            <span style={{ marginLeft: 8 }}>🌀 Orbit — Make the Camera orbit around a fix point.</span>
           </label>
         </div>
 
