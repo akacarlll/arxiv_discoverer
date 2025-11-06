@@ -12,6 +12,11 @@ import getColorByCategory from './utils/colors.ts';
 import NavigationControls from './components/Scene/NavigationControl.tsx';
 import { useEmbeddingsData } from './hooks/useEmbeddingsData.ts';
 import SceneContainer from './components/Scene/SceneContainer.tsx';
+import IntroModal from './components/UI/IntroModal.tsx';
+
+
+const INTRO_STORAGE_KEY = "apev:skipIntro";
+type ControlMode = "orbit" | "fly";
 
 // Main App
 const App: React.FC = () => {
@@ -19,8 +24,17 @@ const App: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const controlsRef = useRef<any>(null);
-  const [controlMode, setControlMode] = useState<'orbit' | 'fly' | 'pointer'>('orbit');
+  const [controlMode, setControlMode] = useState<ControlMode>("orbit");
 
+
+  const [showIntro, setShowIntro] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(INTRO_STORAGE_KEY);
+      return stored !== "true";
+    } catch {
+      return true;
+    }
+  });
   const handleReset = () => {
     if (controlsRef.current) {
       controlsRef.current.reset();
@@ -48,8 +62,25 @@ const App: React.FC = () => {
 
   const categories : Array<string> = Object.keys(data.metadata.statistics.ordered_top_ten_categories);
 
+  const handleStartFromIntro = (mode: ControlMode, dontShowAgain: boolean) => {
+    setControlMode(mode);
+    setShowIntro(false);
+    if (dontShowAgain) {
+      try {
+        localStorage.setItem(INTRO_STORAGE_KEY, "true");
+      } catch {
+        // ignore storage errors
+      }
+    }
+  };
+
   return (
     <div className="app">
+      <IntroModal
+        defaultMode={controlMode}
+        onStart={handleStartFromIntro}
+        show={showIntro}
+      />
       <div className="header">
         <h1>ArXiv Embeddings 3D Explorer</h1>
         <SearchBar
