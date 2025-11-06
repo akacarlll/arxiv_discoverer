@@ -76,7 +76,7 @@ def get_category_color(category: str, saturation: int = 70, lightness: int = 55)
         Hex color string (e.g., "#3498db")
     """
     domain = get_domain(category)
-    base_hue = DOMAIN_BASE_HUES[domain]
+    base_hue = DOMAIN_BASE_HUES.get(domain, 0)
 
     if category == domain or "." not in category:
         return hsl_to_hex(base_hue, saturation, lightness)

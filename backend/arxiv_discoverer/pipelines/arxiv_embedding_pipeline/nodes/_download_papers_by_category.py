@@ -23,6 +23,7 @@ def download_papers_by_category(
     """
 
     new_entries = []
+
     papers_ids = get_papers_ids(downloaded_papers_df)
     for i, category in enumerate(categories):
 
@@ -31,7 +32,8 @@ def download_papers_by_category(
                 logger.info(f"Paper {result.entry_id} already downloaded. Skipping.")
                 continue
 
-            paper_info = extract_paper_info(result)
+            paper_info, paper_entry_id = extract_paper_info(result)
+            papers_ids.add(paper_entry_id)
 
             new_entries.append(paper_info)
             logger.info(f"Added : {result.title}")
@@ -103,7 +105,7 @@ def ensure_utf_8_compatibility(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def extract_paper_info(result) -> dict:
+def extract_paper_info(result) -> tuple[dict, str]:
     """
     Extract relevant information from an arXiv paper result.
 
@@ -115,9 +117,9 @@ def extract_paper_info(result) -> dict:
     """
     if not result.summary:
         logger.info(f"Paper {result.entry_id} has no abstract.")
-
+    entry_id = result.entry_id
     return {
-        "entry_id": result.entry_id,
+        "entry_id": entry_id,
         "updated": result.updated,
         "published": result.published,
         "title": result.title,
@@ -131,7 +133,7 @@ def extract_paper_info(result) -> dict:
         "pdf_url": result.pdf_url,
         "summary": result.summary,
         "paper_id": result.get_short_id(),
-    }
+    }, entry_id
 
 
 def arxiv_search_query(category: str, max_results: int):
