@@ -31,7 +31,7 @@ const SceneContainer: React.FC<SceneContainerProps> = ({
         controlsRef={controlsRef}
         cameraPosition={cameraStartPosition}
         controlMode={controlMode}
-        movementSpeed={0.1}
+        movementSpeed={0.01}
         onCameraMove={() => {}}
       />
       <Suspense fallback={null}>

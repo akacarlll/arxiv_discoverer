@@ -16,7 +16,7 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
   controlsRef, 
   cameraPosition,
   controlMode = 'orbit',
-  movementSpeed = 0.00001,
+  movementSpeed = 0.01,
   onCameraMove
 }) => {
   const { camera } = useThree();
@@ -29,6 +29,17 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     down: 0
   });
   const isShiftPressed = useRef(false);
+
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("input")) {
+        controlsRef.current?.unlock(); // déverrouille le pointer
+      }
+    };
+    window.addEventListener("mousedown", handleMouseDown);
+    return () => window.removeEventListener("mousedown", handleMouseDown);
+  }, []);
+
 
   // 🔹 Keyboard movement logic
   useEffect(() => {
@@ -89,7 +100,7 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
       const moveVec = new THREE.Vector3();
 
       // Adjust speed dynamically
-      const speed = (isShiftPressed.current ? movementSpeed * 2 : movementSpeed) * delta * 60;
+      const speed = (isShiftPressed.current ? movementSpeed * 2.5 : movementSpeed) * delta * 60;
 
       // Forward/Backward
       moveVec.add(direction.clone().multiplyScalar(

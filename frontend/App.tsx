@@ -40,18 +40,6 @@ const App: React.FC = () => {
     setSearchQuery('');
   };
 
-  const filteredCount = useMemo(() => {
-    if (!data || !searchQuery) return data?.coordinates.length || 0;
-    const query = searchQuery.toLowerCase();
-    return data.coordinates.filter(coord => {
-      const details = data.details[coord.id];
-      return (
-        details?.title?.toLowerCase().includes(query) ||
-        details?.authors?.toLowerCase().includes(query) ||
-        details?.primary_category?.toLowerCase().includes(query)
-      );
-    }).length;
-  }, [data, searchQuery]);
 
   if (loading) return <LoadingScreen />;
   if (error) return <div className="error">Error: {error}</div>;
@@ -83,7 +71,9 @@ const App: React.FC = () => {
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          resultCount={filteredCount}
+          data={data}
+          onTeleport={(pos) => {
+          }}
         />
       </div>
 

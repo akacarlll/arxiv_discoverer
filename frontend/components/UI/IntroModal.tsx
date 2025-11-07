@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-type ControlMode = "orbit" | "fly";
+type ControlMode = "fly" | "orbit";
 
 interface IntroModalProps {
   defaultMode?: ControlMode;
@@ -53,7 +53,7 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, s
               name="navmode"
               value="orbit"
               checked={selectedMode === "orbit"}
-              onChange={() => setSelectedMode("fly")}
+              onChange={() => setSelectedMode("orbit")}
             />
             <span style={{ marginLeft: 8 }}>🌀 Orbit — Make the Camera orbit around a fix point.</span>
           </label>

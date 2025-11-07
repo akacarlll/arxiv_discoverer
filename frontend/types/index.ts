@@ -12,7 +12,8 @@ export interface PaperDetails {
   abstract?: string;
   year?: number;
   category: Array<string>;
-  primary_category: string
+  primary_category: string;
+  pdf_url: string
 }
 
 
@@ -32,6 +33,8 @@ export interface EmbeddingsData {
       category: Array<string>;
       primary_category: string;
       abstract: string;
+      pdf_url: string;
+      entry_id:string
     }
   >;
   metadata: Record<string, any>;

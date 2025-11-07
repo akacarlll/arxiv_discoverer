@@ -1,9 +1,14 @@
 // PointCloud Component
 
-import React, { useState, useMemo } from 'react';
+// import React, { useState, useMemo } from 'react';
 import { EmbeddingsData } from '../../types';
 import getColorByCategory from '../../utils/colors';
 import Point from './Point';
+
+import React, { useMemo, useState, useEffect } from "react";
+// import Point from "./Point";
+// import { getColorByCategory } from "./utils"; // ← garde ton import si tu l’avais déjà
+// import { EmbeddingsData } from "../types";   // ← adapte selon ton projet
 
 const PointCloud: React.FC<{
   data: EmbeddingsData;
@@ -13,9 +18,25 @@ const PointCloud: React.FC<{
 }> = ({ data, selectedId, onSelectPoint, searchQuery }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === "m" && hoveredId) {
+        const paperDetails = data.details[hoveredId];
+        if (paperDetails?.pdf_url) {
+          window.open(paperDetails.pdf_url, "_blank");
+        } else {
+          console.warn("Aucun lien PDF pour ce papier :", hoveredId);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [hoveredId, data.details]);
+
   const filteredPoints = useMemo(() => {
     if (!searchQuery) return data.coordinates;
-    
+
     const query = searchQuery.toLowerCase();
     return data.coordinates.filter(coord => {
       const details = data.details[coord.id];
@@ -32,8 +53,7 @@ const PointCloud: React.FC<{
       {filteredPoints.map((coord) => {
         const details = data.details[coord.id];
         const color = getColorByCategory(details.primary_category);
-        console.log(details.primary_category)
-        
+
         return (
           <Point
             key={coord.id}
@@ -44,7 +64,7 @@ const PointCloud: React.FC<{
             isHovered={hoveredId === coord.id}
             onHover={(hovering) => {
               setHoveredId(hovering ? coord.id : null);
-              onSelectPoint(hovering ? coord.id : null); // <-- open/close panel on hover
+              onSelectPoint(hovering ? coord.id : null);
             }}
           />
         );
@@ -53,4 +73,4 @@ const PointCloud: React.FC<{
   );
 };
 
-export default PointCloud
+export default PointCloud;
