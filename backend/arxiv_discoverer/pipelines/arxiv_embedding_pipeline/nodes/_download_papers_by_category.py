@@ -153,6 +153,7 @@ def arxiv_search_query(category: str, max_results: int):
         query=category,
         max_results=max_results,
         sort_by=arxiv.SortCriterion.SubmittedDate,
+        sort_order=arxiv.SortOrder.Descending,
     )
     return safe_results(client, search)
 
