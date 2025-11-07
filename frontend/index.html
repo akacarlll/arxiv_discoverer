@@ -8,6 +8,32 @@
   <body>
     <div id="root"></div>
     <div id="crosshair"></div>
+    <!-- Movement Controls (ZQSD) -->
+    <div id="controls">
+      <!-- Mouse on the left -->
+      <div class="mouse-container">
+        <div class="mouse"></div>
+        <div class="label">Move mouse to look around</div>
+      </div>
+
+      <!-- Keys in the center -->
+      <div class="keys-container">
+        <div class="label">Press button to move.</div>
+        <div class="keys-row">
+          <div class="key">Z</div>
+        </div>
+        <div class="keys-row">
+          <div class="key">Q</div>
+          <div class="key">S</div>
+          <div class="key">D</div>
+        </div>
+        <div class="keys-row">
+          <div class="key">Shift</div>
+        </div>
+        <div class="label">Hold Shift to boost</div>
+      </div>
+    </div>
+
     <script type="module" src="/main.tsx"></script>
   </body>
 </html>
