@@ -30,18 +30,35 @@ def generate_category_colors(vizualisation_json: Dict) -> Dict:
 
     color_map = {}
     for category in categories.keys():
-        color_map[category] = get_category_color(category)
+        color_map[category.split(".")[0]] = get_category_color(category)
 
     return color_map
 
+def get_category_color(category: str, saturation: int = 70, lightness: int = 55) -> str:
+    """
+    Generate hex color for a category with hierarchical awareness.
+    Categories with the same base domain get similar colors.
 
-def hash_string(s: str) -> int:
-    """Generate a consistent hash for a string."""
-    hash_val = 0
-    for char in s:
-        hash_val = ((hash_val << 5) - hash_val) + ord(char)
-        hash_val = hash_val & 0xFFFFFFFF  # Convert to 32-bit integer
-    return abs(hash_val)
+    Args:
+        category: ArXiv category (e.g., "cs.CV", "math.CO")
+        saturation: Base saturation percentage (0-100)
+        lightness: Base lightness percentage (0-100)
+
+    Returns:
+        Hex color string (e.g., "#3498db")
+    """
+    domain = get_domain(category)
+    base_hue = DOMAIN_BASE_HUES.get(domain, 0)
+
+    return hsl_to_hex(base_hue, saturation, lightness)
+
+
+def get_domain(category: str) -> str:  # type: ignore
+    """
+    Extract domain prefix from ArXiv category.
+    e.g., "cs.CV" -> "cs", "astro-ph.GA" -> "astro-ph"
+    """
+    return category.split(".")[0]
 
 
 def hsl_to_hex(h: float, s: float, l: float) -> str:
@@ -60,60 +77,6 @@ def hsl_to_hex(h: float, s: float, l: float) -> str:
     b = int(round(b * 255))
 
     return f"#{r:02x}{g:02x}{b:02x}"
-
-
-def get_category_color(category: str, saturation: int = 70, lightness: int = 55) -> str:
-    """
-    Generate hex color for a category with hierarchical awareness.
-    Categories with the same base domain get similar colors.
-
-    Args:
-        category: ArXiv category (e.g., "cs.CV", "math.CO")
-        saturation: Base saturation percentage (0-100)
-        lightness: Base lightness percentage (0-100)
-
-    Returns:
-        Hex color string (e.g., "#3498db")
-    """
-    domain = get_domain(category)
-    base_hue = DOMAIN_BASE_HUES.get(domain, 0)
-
-    if category == domain or "." not in category:
-        return hsl_to_hex(base_hue, saturation, lightness)
-
-    subcategory = ".".join(category.split(".")[1:])
-    hash_val = hash_string(subcategory)
-
-    hue_variation = (hash_val % 60) - 30
-    final_hue = (base_hue + hue_variation + 360) % 360
-
-    sat_variation = (hash_val % 20) - 10
-    final_sat = max(50, min(90, saturation + sat_variation))
-
-    return hsl_to_hex(final_hue, final_sat, lightness)
-
-
-def get_domain(category: str) -> str:  # type: ignore
-    """
-    Extract domain prefix from ArXiv category.
-    e.g., "cs.CV" -> "cs", "astro-ph.GA" -> "astro-ph"
-    """
-    base = category.split(".")[0]
-    if "-" in base:
-        multi_part_domains = [
-            "astro-ph",
-            "cond-mat",
-            "q-bio",
-            "q-fin",
-            "quant-ph",
-            "gr-qc",
-        ]
-        if base in multi_part_domains:
-            return base
-        logger.info(f"{base} needs to be split by hyphen.")
-        return base.split("-")[0]
-
-    return base
 
 
 DOMAIN_BASE_HUES = {
