@@ -44,6 +44,18 @@ visualization_json_aws_s3:
   save_args:
     indent: 2
 
+articles_metadata_local:
+  type: kedro_datasets.json.JSONDataset
+  filepath: data/03_primary/articles_metadata.json
+  save_args:
+    indent: 2
+
+articles_metadata_aws_s3:
+  type: kedro_datasets.json.JSONDataset
+  filepath: data/03_primary/articles_metadata.json
+  credentials: aws_s3
+  save_args:
+    indent: 2
 category_colors_map:
   type: kedro_datasets.json.JSONDataset
   filepath: frontend/public/data/colors_mapping.json
