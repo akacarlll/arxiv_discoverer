@@ -25,12 +25,7 @@ const App: React.FC = () => {
 
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {
-    try {
-      const stored = localStorage.getItem(INTRO_STORAGE_KEY);
-      return stored !== "true";
-    } catch {
-      return true;
-    }
+    return true;
   });
   const handleReset = () => {
     if (controlsRef.current) {

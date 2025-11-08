@@ -16,7 +16,8 @@ app.add_middleware(
 )
 
 # Load metadata once on startup
-metadata_file = os.path.join(os.path.dirname(__file__), "data/03_primary/articles_metadata.json")
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))  # go up 2 levels
+metadata_file = os.path.join(project_root, "data/03_primary/articles_metadata.json")
 with open(metadata_file, "r", encoding="utf-8") as f:
     metadata = json.load(f)
 

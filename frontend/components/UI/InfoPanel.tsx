@@ -1,25 +1,54 @@
-// Info Panel
-import { PaperDetails, Coordinate } from "../../types";
+import { PaperDetails } from "../../types";
 import getColorByCategory from "../../utils/colors";
 import { X } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import fetchPaper from '../../hooks/fetchPapersDetails';
 
 const InfoPanel: React.FC<{
   paperId: string | null;
-  details: Record<string, PaperDetails>;
   onClose: () => void;
-}> = ({ paperId, details, onClose }) => {
+}> = ({ paperId, onClose }) => {
+  const [paper, setPaper] = useState<PaperDetails | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!paperId) return;
+
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchPaper(paperId);
+        setPaper(data);
+      } catch (err) {
+        console.error("Failed to fetch paper details:", paperId, err);
+        setPaper(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [paperId]);
+
   if (!paperId) return null;
 
-  const paper = details[paperId];
+  if (loading) {
+    return (
+      <div className="info-panel">
+        <div className="info-header">
+          <h2>Loading paper details...</h2>
+        </div>
+      </div>
+    );
+  }
+
   if (!paper) return null;
 
   return (
     <div className="info-panel">
       <div className="info-header">
         <h2>Paper Details</h2>
-        <button onClick={onClose} className="close-btn">
-          <X size={20} />
-        </button>
+        <button onClick={onClose}><X /></button>
       </div>
       <div className="info-content">
         <h3>{paper.title}</h3>
@@ -47,4 +76,4 @@ const InfoPanel: React.FC<{
   );
 };
 
-export default InfoPanel
+export default InfoPanel;
