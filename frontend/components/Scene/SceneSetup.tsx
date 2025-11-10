@@ -1,8 +1,10 @@
 // Scene Setup
 import { OrbitControls, PerspectiveCamera, PointerLockControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { Html } from "@react-three/drei";
+
 
 interface SceneSetupProps {
   controlsRef: React.RefObject<any>;
@@ -15,7 +17,7 @@ interface SceneSetupProps {
 const SceneSetup: React.FC<SceneSetupProps> = ({ 
   controlsRef, 
   cameraPosition,
-  controlMode = 'orbit',
+  controlMode = 'fly',
   movementSpeed = 0.01,
   onCameraMove
 }) => {
@@ -29,6 +31,8 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     down: 0
   });
   const isShiftPressed = useRef(false);
+  const [pointerLocked, setPointerLocked] = useState(false);
+
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
@@ -39,6 +43,24 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     window.addEventListener("mousedown", handleMouseDown);
     return () => window.removeEventListener("mousedown", handleMouseDown);
   }, []);
+
+  useEffect(() => {
+    if (!controlsRef.current) return;
+
+    const controls = controlsRef.current;
+
+    const handleLock = () => setPointerLocked(true);
+    const handleUnlock = () => setPointerLocked(false);
+
+    controls.addEventListener("lock", handleLock);
+    controls.addEventListener("unlock", handleUnlock);
+
+    return () => {
+      controls.removeEventListener("lock", handleLock);
+      controls.removeEventListener("unlock", handleUnlock);
+    };
+  }, [controlsRef]);
+
 
 
   // 🔹 Keyboard movement logic
@@ -154,6 +176,23 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
       {/* True Fly mode with mouse look */}
       {controlMode === 'fly' && (
         <PointerLockControls ref={controlsRef} />
+      )}
+
+      {controlMode === "fly" && !pointerLocked && (
+        <Html center>
+          <div style={{
+            top: 50,
+            left: 50,
+            padding: "6px 12px",
+            background: "rgba(8, 0, 0, 0.5)",
+            color: "white",
+            borderRadius: 6,
+            fontSize: 14,
+            pointerEvents: "none",
+          }}>
+            Click anywhere to lock pointer and fly
+          </div>
+        </Html>
       )}
 
       {/* Basic lighting */}

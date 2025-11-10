@@ -6,7 +6,7 @@ dimensionality_reduction_params_umap:
   dimensionality_reduction_method : "umap"
   dimensionality_reduction_params: 
     n_neighbors: 15
-    min_dist: 0.1
+    min_dist: 0.25
     metric: "euclidean"
 
 detail_fields:
