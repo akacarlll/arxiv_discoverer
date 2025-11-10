@@ -15,7 +15,7 @@ interface SceneSetupProps {
 const SceneSetup: React.FC<SceneSetupProps> = ({ 
   controlsRef, 
   cameraPosition,
-  controlMode = 'orbit',
+  controlMode = 'fly',
   movementSpeed = 0.01,
   onCameraMove
 }) => {

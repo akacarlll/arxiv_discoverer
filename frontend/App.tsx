@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const controlsRef = useRef<any>(null);
-  const [controlMode, setControlMode] = useState<ControlMode>("orbit");
+  const [controlMode, setControlMode] = useState<ControlMode>("fly");
 
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {

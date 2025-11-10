@@ -8,7 +8,7 @@ interface SceneContainerProps {
   data: EmbeddingsData;
   selectedId: string | null;
   onSelectPoint: (id: string | null) => void;
-  controlMode: "orbit" | "fly" | "pointer";
+  controlMode: "fly" | "orbit";
 }
 
 const SceneContainer: React.FC<SceneContainerProps> = ({
