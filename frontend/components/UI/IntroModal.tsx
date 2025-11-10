@@ -4,13 +4,12 @@ type ControlMode = "fly" | "orbit";
 
 interface IntroModalProps {
   defaultMode?: ControlMode;
-  onStart: (mode: ControlMode, dontShowAgain: boolean) => void;
+  onStart: (mode: ControlMode) => void;
   show: boolean;
 }
 
 const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, show }) => {
   const [selectedMode, setSelectedMode] = useState<ControlMode>(defaultMode);
-  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectedMode(defaultMode);
@@ -29,7 +28,7 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, s
               Fly through clusters of topics, find related papers, and uncover hidden connections.
             </p>
           </div>
-          <button onClick={() => onStart(defaultMode, dontShowAgain)} style={closeXButtonStyle} aria-label="Fermer le modal">×</button>
+          <button onClick={() => onStart(defaultMode)} style={closeXButtonStyle} aria-label="Fermer le modal">×</button>
         </div>
 
         <div style={{ marginTop: 12 }}>
@@ -60,20 +59,12 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, s
         </div>
 
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <input
-              type="checkbox"
-              checked={dontShowAgain}
-              onChange={(e) => setDontShowAgain(e.target.checked)}
-            />
-            <span>Ne plus afficher ce message</span>
-          </label>
 
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => onStart(selectedMode, dontShowAgain)} style={primaryButtonStyle}>
+            <button onClick={() => onStart(selectedMode)} style={primaryButtonStyle}>
               Start Exploring 🚀
             </button>
-            <button onClick={() => onStart(defaultMode, dontShowAgain)} style={secondaryButtonStyle}>
+            <button onClick={() => onStart(defaultMode)} style={secondaryButtonStyle}>
               Skipper (mode par défaut)
             </button>
           </div>

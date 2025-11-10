@@ -12,7 +12,6 @@ import SceneContainer from './components/Scene/SceneContainer.tsx';
 import IntroModal from './components/UI/IntroModal.tsx';
 
 
-const INTRO_STORAGE_KEY = "apev:skipIntro";
 type ControlMode = "orbit" | "fly";
 
 // Main App
@@ -25,12 +24,7 @@ const App: React.FC = () => {
 
 
   const [showIntro, setShowIntro] = useState<boolean>(() => {
-    try {
-      const stored = localStorage.getItem(INTRO_STORAGE_KEY);
-      return stored !== "true";
-    } catch {
-      return true;
-    }
+    return true;
   });
   const handleReset = () => {
     if (controlsRef.current) {
@@ -47,16 +41,9 @@ const App: React.FC = () => {
 
   const categories : Array<string> = Object.keys(data.metadata.statistics.ordered_top_ten_categories);
 
-  const handleStartFromIntro = (mode: ControlMode, dontShowAgain: boolean) => {
+  const handleStartFromIntro = (mode: ControlMode) => {
     setControlMode(mode);
     setShowIntro(false);
-    if (dontShowAgain) {
-      try {
-        localStorage.setItem(INTRO_STORAGE_KEY, "true");
-      } catch {
-        // ignore storage errors
-      }
-    }
   };
 
   return (
