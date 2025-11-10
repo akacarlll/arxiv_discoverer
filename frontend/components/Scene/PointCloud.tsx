@@ -4,6 +4,27 @@ import * as THREE from 'three';
 import { EmbeddingsData } from '../../types';
 import getColorByCategory from '../../utils/colors';
 
+// Create sprite texture once (same as original Point component)
+const spriteTexture = (() => {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  const grd = ctx.createRadialGradient(
+    size / 2, size / 2, 0,
+    size / 2, size / 2, size / 2
+  );
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.3, 'rgba(255,255,255,0.9)');
+  grd.addColorStop(0.6, 'rgba(255,255,255,0.2)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+})();
+
 const PointCloud: React.FC<{
   data: EmbeddingsData;
   selectedId: string | null;
@@ -38,16 +59,20 @@ const PointCloud: React.FC<{
     return map;
   }, [filteredPoints]);
 
-  // Create geometry and material once
-  const geometry = useMemo(() => new THREE.SphereGeometry(0.015, 8, 8), []);
-  const material = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        transparent: true,
-        opacity: 0.9,
-      }),
-    []
-  );
+  // Create geometry (PlaneGeometry for sprites) and material with sprite texture
+  const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), []);
+  
+  const material = useMemo(() => {
+    const mat = new THREE.MeshBasicMaterial({
+      map: spriteTexture,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 0.9,
+      side: THREE.DoubleSide,
+    });
+    return mat;
+  }, []);
 
   // Populate instance matrices and colors
   useEffect(() => {
@@ -62,7 +87,8 @@ const PointCloud: React.FC<{
       const details = data.details[coord.id];
       const categoryColor = getColorByCategory(details.primary_category);
 
-      // Set position
+      // Set position and base scale
+      matrix.makeScale(baseScale, baseScale, baseScale);
       matrix.setPosition(coord.x, coord.y, coord.z);
       mesh.setMatrixAt(i, matrix);
 
@@ -77,7 +103,7 @@ const PointCloud: React.FC<{
     }
   }, [filteredPoints, data.details]);
 
-  // Update scale for selected/hovered points
+  // Update scale and opacity for selected/hovered points
   useEffect(() => {
     if (!meshRef.current) return;
 
@@ -90,13 +116,15 @@ const PointCloud: React.FC<{
     filteredPoints.forEach((coord, i) => {
       const isSelected = selectedId === coord.id;
       const isHovered = hoveredId === coord.id;
-      const scaleFactor = isSelected ? 2 : isHovered ? 1.5 : 1;
+      
+      // Use same scale values as original Point component
+      const scaleValue = isSelected ? 0.06 : isHovered ? 0.045 : 0.03;
 
       mesh.getMatrixAt(i, matrix);
       matrix.decompose(position, quaternion, scale);
       
       // Apply new scale
-      scale.setScalar(scaleFactor);
+      scale.setScalar(scaleValue);
       matrix.compose(position, quaternion, scale);
       mesh.setMatrixAt(i, matrix);
     });
@@ -104,12 +132,34 @@ const PointCloud: React.FC<{
     mesh.instanceMatrix.needsUpdate = true;
   }, [filteredPoints, selectedId, hoveredId]);
 
-  // Handle raycasting for hover/click detection
+  // Make sprites always face the camera
   useFrame(() => {
     if (!meshRef.current) return;
 
+    // Update all instances to face camera
+    const mesh = meshRef.current;
+    const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const scale = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+
+    // Get camera quaternion
+    const cameraQuaternion = camera.quaternion.clone();
+
+    filteredPoints.forEach((coord, i) => {
+      mesh.getMatrixAt(i, matrix);
+      matrix.decompose(position, quaternion, scale);
+      
+      // Apply camera rotation so sprite faces camera
+      matrix.compose(position, cameraQuaternion, scale);
+      mesh.setMatrixAt(i, matrix);
+    });
+
+    mesh.instanceMatrix.needsUpdate = true;
+
+    // Handle raycasting for hover/click detection
     raycaster.setFromCamera(pointer, camera);
-    const intersects = raycaster.intersectObject(meshRef.current);
+    const intersects = raycaster.intersectObject(mesh);
 
     if (intersects.length > 0) {
       const instanceId = intersects[0].instanceId;
