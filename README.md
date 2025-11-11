@@ -6,6 +6,18 @@ The primary objective of the ArXiv Paper Embedding Visualizer (APEV) is to provi
 
 This application visualizes research paper embeddings from ArXiv as a 3D interactive space where each paper is represented as a clickable point. Users can freely navigate through the embedding space, click on a point to view a paper's detailed information, and eventually filter or color the data based on rich metadata (such as topics, authors, and publication dates).
 
+Link to the project in production : [Arxiv Paper Embedding Visualizer](https://arxiv-discoverer.onrender.com/)
+
+## 🖼️ Demo & Screenshots  
+
+#### Cluster vizualisation in a GIF 
+![alt text](data\08_reporting\cluster_gif.gif)
+
+
+#### Cluster vizualisation  
+![alt text](data\08_reporting\cluster_viz.png)
+
+
 ## 🧱 Architecture Overview
 
 The project is divided into two distinct components: the backend data pipeline and the frontend visualization application.
