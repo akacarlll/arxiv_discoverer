@@ -69,6 +69,7 @@ const IntroModal: React.FC<IntroModalProps> = ({ defaultMode = "fly", onStart, s
             </button>
           </div>
         </div>
+        <p> Click on "M" to open a paper, when hovering over it.</p>
       </div>
     </div>
   );

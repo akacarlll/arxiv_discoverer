@@ -44,23 +44,6 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
     return () => window.removeEventListener("mousedown", handleMouseDown);
   }, []);
 
-  useEffect(() => {
-    if (!controlsRef.current) return;
-
-    const controls = controlsRef.current;
-
-    const handleLock = () => setPointerLocked(true);
-    const handleUnlock = () => setPointerLocked(false);
-
-    controls.addEventListener("lock", handleLock);
-    controls.addEventListener("unlock", handleUnlock);
-
-    return () => {
-      controls.removeEventListener("lock", handleLock);
-      controls.removeEventListener("unlock", handleUnlock);
-    };
-  }, [controlsRef]);
-
 
 
   // 🔹 Keyboard movement logic
@@ -176,23 +159,6 @@ const SceneSetup: React.FC<SceneSetupProps> = ({
       {/* True Fly mode with mouse look */}
       {controlMode === 'fly' && (
         <PointerLockControls ref={controlsRef} />
-      )}
-
-      {controlMode === "fly" && !pointerLocked && (
-        <Html center>
-          <div style={{
-            top: 50,
-            left: 50,
-            padding: "6px 12px",
-            background: "rgba(8, 0, 0, 0.5)",
-            color: "white",
-            borderRadius: 6,
-            fontSize: 14,
-            pointerEvents: "none",
-          }}>
-            Click anywhere to lock pointer and fly
-          </div>
-        </Html>
       )}
 
       {/* Basic lighting */}
