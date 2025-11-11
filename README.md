@@ -15,7 +15,7 @@ Link to the project in production : [Arxiv Paper Embedding Visualizer](https://a
 
 
 #### Cluster vizualisation  
-![alt text](data\08_reporting\cluster_viz.png)
+![alt text](data/08_reporting/cluster_viz.png)
 
 
 ## 🧱 Architecture Overview
