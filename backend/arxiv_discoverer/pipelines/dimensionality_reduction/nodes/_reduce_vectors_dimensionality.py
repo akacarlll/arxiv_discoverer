@@ -17,10 +17,6 @@ def reduce_umap(
     """
     UMAP - Uniform Manifold Approximation and Projection
     
-    BEST FOR: General purpose visualization, preserves both local and global structure
-    SPEED: Fast (minutes for 10k samples)
-    QUALITY: Excellent balance
-    
     Args:
         embeddings_dict: {path: high_dim_vector}
         n_neighbors: Balance local vs global structure (5-50, default 15)
@@ -59,10 +55,6 @@ def reduce_pca(
     """
     PCA - Principal Component Analysis
     
-    BEST FOR: Quick baseline, understanding linear structure, very large datasets
-    SPEED: Very fast (seconds for 100k samples)
-    QUALITY: Only captures linear relationships, may miss complex structure
-    
     Args:
         embeddings_dict: {path: high_dim_vector}
         whiten: Whether to normalize components (usually False for visualization)
@@ -98,10 +90,6 @@ def reduce_pca_umap(
 ) -> dict[str, np.ndarray]:
     """
     Hybrid approach: PCA preprocessing + UMAP
-    
-    BEST FOR: Very high-dimensional data (>500 dims), speeds up UMAP
-    SPEED: Faster than pure UMAP
-    QUALITY: Nearly as good as pure UMAP, sometimes better
     
     Args:
         embeddings_dict: {path: high_dim_vector}
